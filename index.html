@@ -443,15 +443,7 @@ async function wixQuery(filter = null) {
     throw new Error(`Wix API ${res.status}: ${err}`);
   }
   const data = await res.json();
-  console.log('🔍 Raw Wix response:', JSON.stringify(data).substring(0, 500));
-  // Wix v2 returns dataItems[].data OR dataItems[].dataItem.data depending on endpoint
-  const items = data.dataItems?.map(item => {
-    const fields = item.data || item;
-    return fields;
-  }) || [];
-  console.log('📦 First item keys:', items[0] ? Object.keys(items[0]) : 'none');
-  console.log('📦 First item:', JSON.stringify(items[0]).substring(0, 300));
-  return items;
+  return data.dataItems?.map(item => item.data || item) || [];
 }
 
 async function wixUpdate(itemId, updates) {
@@ -552,8 +544,10 @@ function buildCard(b) {
   const status = b.bookingStatus || 'pending_confirmation';
   card.className = `card status-${status.replace('pending_confirmation','pending')}`;
 
-  const dateStr = b.scheduledDetailDate
-    ? new Date(b.scheduledDetailDate).toLocaleDateString('en-US', {
+  // Wix stores dates as { $date: "ISO string" } — unwrap if needed
+  const rawDate = b.scheduledDetailDate?.$date || b.scheduledDetailDate;
+  const dateStr = rawDate
+    ? new Date(rawDate).toLocaleDateString('en-US', {
         weekday:'long', month:'long', day:'numeric', year:'numeric'
       })
     : 'Date TBD';
