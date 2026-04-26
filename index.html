@@ -447,6 +447,34 @@ async function wixQuery(filter = null) {
 }
 
 async function wixUpdate(itemId, updates) {
+  // Fetch the full existing record from Wix first, then merge updates into it
+  // This prevents PUT from wiping fields not included in the update
+  let existing = {};
+  try {
+    const getRes = await fetch(
+      `${PROXY_URL}/proxy/wix-data/v2/items/${itemId}?siteId=${cfg.siteId}&dataCollectionId=${cfg.collection}`,
+      {
+        method: 'GET',
+        mode: 'cors',
+        headers: {
+          'Authorization': cfg.apiKey,
+          'wix-site-id':   cfg.siteId,
+          'Content-Type':  'application/json',
+        },
+      }
+    );
+    if (getRes.ok) {
+      const getJson = await getRes.json();
+      existing = getJson.dataItem?.data || getJson.data || {};
+    }
+  } catch(e) {
+    console.warn('Could not fetch existing record for merge:', e.message);
+  }
+
+  const merged = { ...existing, ...updates };
+  // Strip Wix system fields — they can't be written back
+  ['_createdDate','_updatedDate','_publishStatus','_owner'].forEach(k => delete merged[k]);
+
   const res = await fetch(
     `${PROXY_URL}/proxy/wix-data/v2/items/${itemId}?siteId=${cfg.siteId}`,
     {
@@ -459,11 +487,14 @@ async function wixUpdate(itemId, updates) {
       },
       body: JSON.stringify({
         dataCollectionId: cfg.collection,
-        dataItem: { id: itemId, data: updates },
+        dataItem: { id: itemId, data: merged },
       }),
     }
   );
-  if (!res.ok) throw new Error(`Update failed: ${res.status}`);
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`Update failed ${res.status}: ${errText}`);
+  }
   return res.json();
 }
 
