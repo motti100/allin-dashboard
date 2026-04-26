@@ -270,7 +270,7 @@
 <div class="modal-overlay" id="configModal">
   <div class="modal">
     <h2>🧽 Connect to Wix</h2>
-    <p>Enter your Wix API credentials to load your bookings. These are saved in your browser — you only need to do this once.</p>
+    <p>Enter your Wix API credentials to load your bookings. These are saved in your browser — you only need to do this once. Your API key is never sent anywhere except directly to Wix.</p>
     <div class="field">
       <label>Wix API Key</label>
       <input type="password" id="inputApiKey" placeholder="IST.eyJraWQi..."/>
@@ -410,9 +410,10 @@ async function wixQuery(filter = null) {
     `https://www.wixapis.com/wix-data/v2/items/query?siteId=${cfg.siteId}`,
     {
       method: 'POST',
+      mode: 'cors',
       headers: {
-        'Authorization':  cfg.apiKey,
-        'wix-site-id':    cfg.siteId,
+        'Authorization': cfg.apiKey,
+        'wix-site-id':   cfg.siteId,
         'Content-Type':  'application/json',
       },
       body: JSON.stringify(body),
@@ -431,10 +432,11 @@ async function wixUpdate(itemId, updates) {
     `https://www.wixapis.com/wix-data/v2/items/${itemId}?siteId=${cfg.siteId}`,
     {
       method: 'PUT',
+      mode: 'cors',
       headers: {
         'Authorization': cfg.apiKey,
         'wix-site-id':   cfg.siteId,
-        'Content-Type': 'application/json',
+        'Content-Type':  'application/json',
       },
       body: JSON.stringify({
         dataCollectionId: cfg.collection,
@@ -668,7 +670,15 @@ function showLoading(show) {
 }
 function showError(msg) {
   const bar = document.getElementById('errorBar');
-  bar.textContent = '⚠️ ' + msg;
+  let friendly = msg;
+  if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) {
+    friendly = 'Cannot connect to Wix API. If opening this file locally (file://), host it on GitHub Pages or Netlify first — browsers block direct API calls from local files.';
+  } else if (msg.includes('401') || msg.includes('403')) {
+    friendly = 'Authentication failed — check your Wix API Key in ⚙ Settings.';
+  } else if (msg.includes('404')) {
+    friendly = 'Collection not found — check your Collection ID in ⚙ Settings. It should be "ScheduleDetailing".';
+  }
+  bar.innerHTML = '⚠️ ' + friendly;
   bar.classList.add('show');
 }
 function hideError() { document.getElementById('errorBar').classList.remove('show'); }
