@@ -270,7 +270,7 @@
 <div class="modal-overlay" id="configModal">
   <div class="modal">
     <h2>🧽 Connect to Wix</h2>
-    <p>Enter your Wix API credentials to load your bookings. These are saved in your browser — you only need to do this once. Your API key is never sent anywhere except directly to Wix.</p>
+    <p>Enter your Wix API credentials to load your bookings. These are saved in your browser — you only need to do this once. Your API key is never sent anywhere except your own Cloudflare Worker proxy.</p>
     <div class="field">
       <label>Wix API Key</label>
       <input type="password" id="inputApiKey" placeholder="IST.eyJraWQi..."/>
@@ -282,6 +282,11 @@
     <div class="field">
       <label>Collection ID</label>
       <input type="text" id="inputCollection" placeholder="ScheduleDetailing" value="ScheduleDetailing"/>
+    </div>
+    <div class="field">
+      <label>Cloudflare Worker URL <span style="color:var(--green)">*</span></label>
+      <input type="text" id="inputProxy" placeholder="https://allin-proxy.yourname.workers.dev"/>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">Deploy the included <code>cloudflare_worker.js</code> at workers.cloudflare.com (free)</div>
     </div>
     <button class="btn-save" onclick="saveConfig()">Connect Dashboard →</button>
   </div>
@@ -361,12 +366,21 @@ const COLOR_HEX = {
 let allBookings = [];
 let currentTab  = 'pending_confirmation';
 let cfg         = null;
+// ── Proxy: your Cloudflare Worker URL ───────────────────────────────────────
+// After deploying the worker, paste your worker URL here:
+// e.g. https://allin-proxy.yourname.workers.dev
+let PROXY_URL = localStorage.getItem('allin_proxy_url') || '';
 
 // ── Init ─────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
   cfg = loadConfig();
-  if (!cfg) {
+  if (!cfg || !PROXY_URL) {
     document.getElementById('configModal').classList.remove('hidden');
+    if (cfg) {
+      document.getElementById('inputApiKey').value    = cfg.apiKey    || '';
+      document.getElementById('inputSiteId').value    = cfg.siteId    || '';
+      document.getElementById('inputCollection').value= cfg.collection|| 'ScheduleDetailing';
+    }
     return;
   }
   document.getElementById('configModal').classList.add('hidden');
@@ -382,6 +396,10 @@ function saveConfig() {
   const siteId     = document.getElementById('inputSiteId').value.trim();
   const collection = document.getElementById('inputCollection').value.trim() || 'ScheduleDetailing';
   if (!apiKey || !siteId) { alert('API Key and Site ID are required.'); return; }
+  const proxy = document.getElementById('inputProxy').value.trim().replace(/\/$/, '');
+  if (!proxy) { alert('Cloudflare Worker URL is required. Deploy the worker first.'); return; }
+  PROXY_URL = proxy;
+  localStorage.setItem('allin_proxy_url', proxy);
   cfg = { apiKey, siteId, collection };
   localStorage.setItem(CONFIG_KEY, JSON.stringify(cfg));
   document.getElementById('configModal').classList.add('hidden');
@@ -392,6 +410,7 @@ function showConfig() {
     document.getElementById('inputApiKey').value    = cfg.apiKey    || '';
     document.getElementById('inputSiteId').value    = cfg.siteId    || '';
     document.getElementById('inputCollection').value= cfg.collection|| 'ScheduleDetailing';
+    document.getElementById('inputProxy').value     = PROXY_URL     || '';
   }
   document.getElementById('configModal').classList.remove('hidden');
 }
@@ -407,7 +426,7 @@ async function wixQuery(filter = null) {
     },
   };
   const res = await fetch(
-    `https://www.wixapis.com/wix-data/v2/items/query?siteId=${cfg.siteId}`,
+    `${PROXY_URL}/proxy/wix-data/v2/items/query?siteId=${cfg.siteId}`,
     {
       method: 'POST',
       mode: 'cors',
@@ -429,7 +448,7 @@ async function wixQuery(filter = null) {
 
 async function wixUpdate(itemId, updates) {
   const res = await fetch(
-    `https://www.wixapis.com/wix-data/v2/items/${itemId}?siteId=${cfg.siteId}`,
+    `${PROXY_URL}/proxy/wix-data/v2/items/${itemId}?siteId=${cfg.siteId}`,
     {
       method: 'PUT',
       mode: 'cors',
@@ -672,7 +691,7 @@ function showError(msg) {
   const bar = document.getElementById('errorBar');
   let friendly = msg;
   if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) {
-    friendly = 'Cannot connect to Wix API. If opening this file locally (file://), host it on GitHub Pages or Netlify first — browsers block direct API calls from local files.';
+    friendly = 'Cannot connect. Check your Cloudflare Worker URL in ⚙ Settings, and make sure the worker is deployed and running.';
   } else if (msg.includes('401') || msg.includes('403')) {
     friendly = 'Authentication failed — check your Wix API Key in ⚙ Settings.';
   } else if (msg.includes('404')) {
