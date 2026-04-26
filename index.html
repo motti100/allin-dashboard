@@ -443,7 +443,15 @@ async function wixQuery(filter = null) {
     throw new Error(`Wix API ${res.status}: ${err}`);
   }
   const data = await res.json();
-  return data.dataItems?.map(item => item.data) || [];
+  console.log('🔍 Raw Wix response:', JSON.stringify(data).substring(0, 500));
+  // Wix v2 returns dataItems[].data OR dataItems[].dataItem.data depending on endpoint
+  const items = data.dataItems?.map(item => {
+    const fields = item.data || item;
+    return fields;
+  }) || [];
+  console.log('📦 First item keys:', items[0] ? Object.keys(items[0]) : 'none');
+  console.log('📦 First item:', JSON.stringify(items[0]).substring(0, 300));
+  return items;
 }
 
 async function wixUpdate(itemId, updates) {
