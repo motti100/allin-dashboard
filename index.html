@@ -382,9 +382,17 @@
       <input type="text" id="inputCollection" placeholder="ScheduleDetailing" value="ScheduleDetailing"/>
     </div>
     <div class="field">
-      <label>Cloudflare Worker URL <span style="color:var(--gold)">*</span></label>
+      <label>Cloudflare Worker URL <span style="color:var(--red)">*</span></label>
       <input type="text" id="inputProxy" placeholder="https://allin-proxy.mtobias2000.workers.dev"/>
       <div style="font-size:11px;color:var(--muted);margin-top:5px;font-family:var(--body)">Your proxy worker URL from Cloudflare</div>
+    </div>
+    <div class="field">
+      <label>Firebase Project ID <span style="color:var(--muted)">(optional — for app sync)</span></label>
+      <input type="text" id="inputFirebaseProject" placeholder="maintain--it"/>
+    </div>
+    <div class="field">
+      <label>Firebase API Key <span style="color:var(--muted)">(optional — for app sync)</span></label>
+      <input type="password" id="inputFirebaseKey" placeholder="AIzaSy..."/>
     </div>
     <button class="btn-connect" onclick="saveConfig()">CONNECT DASHBOARD</button>
   </div>
@@ -496,17 +504,25 @@ function saveConfig() {
   if (!proxy) { alert('Cloudflare Worker URL is required. Deploy the worker first.'); return; }
   PROXY_URL = proxy;
   localStorage.setItem('allin_proxy_url', proxy);
-  cfg = { apiKey, siteId, collection };
+  cfg = {
+    apiKey:            apiKey,
+    siteId:            siteId,
+    collection:        collection,
+    firebaseProjectId: document.getElementById('inputFirebaseProject').value.trim(),
+    firebaseApiKey:    document.getElementById('inputFirebaseKey').value.trim(),
+  };
   localStorage.setItem(CONFIG_KEY, JSON.stringify(cfg));
   document.getElementById('configModal').classList.add('hidden');
   loadBookings();
 }
 function showConfig() {
   if (cfg) {
-    document.getElementById('inputApiKey').value    = cfg.apiKey    || '';
-    document.getElementById('inputSiteId').value    = cfg.siteId    || '';
-    document.getElementById('inputCollection').value= cfg.collection|| 'ScheduleDetailing';
-    document.getElementById('inputProxy').value     = PROXY_URL     || '';
+    document.getElementById('inputApiKey').value        = cfg.apiKey    || '';
+    document.getElementById('inputSiteId').value        = cfg.siteId    || '';
+    document.getElementById('inputCollection').value    = cfg.collection|| 'ScheduleDetailing';
+    document.getElementById('inputProxy').value         = PROXY_URL     || '';
+    document.getElementById('inputFirebaseProject').value = cfg.firebaseProjectId || '';
+    document.getElementById('inputFirebaseKey').value   = cfg.firebaseApiKey    || '';
   }
   document.getElementById('configModal').classList.remove('hidden');
 }
@@ -791,12 +807,43 @@ async function confirmBooking(itemId, btn) {
 async function completeBooking(itemId, btn) {
   btn.disabled = true; btn.textContent = 'Saving…';
   try {
+    // 1. Update Wix
     await wixUpdate(itemId, {
       bookingStatus: 'completed',
       completedAt:   { $date: new Date().toISOString() },
     });
+
+    // 2. Write to Firebase so the app auto-completes the task
+    const booking = allBookings.find(b => (b._id || b.orderId) === itemId);
+    if (booking?.taskId && booking?.customerId && cfg.firebaseApiKey) {
+      await writeFirebaseCompletion(booking);
+    }
+
     await loadBookings();
   } catch(err) { showError('Could not complete: ' + err.message); btn.disabled = false; btn.textContent = '🏁 Mark Complete'; }
+}
+
+async function writeFirebaseCompletion(booking) {
+  // Write to Firebase REST API: bookingCompletions/{taskId}
+  // This triggers the app's onSnapshot listener to auto-complete the task
+  try {
+    const url = `https://firestore.googleapis.com/v1/projects/${cfg.firebaseProjectId}/databases/(default)/documents/bookingCompletions/${booking.taskId}?key=${cfg.firebaseApiKey}`;
+    await fetch(url, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fields: {
+          customerId:   { stringValue: booking.customerId },
+          partnerKey:   { stringValue: booking.partnerKey || '' },
+          completedAt:  { stringValue: new Date().toISOString() },
+          applied:      { booleanValue: false },
+        }
+      })
+    });
+    console.log('✅ Firebase completion written for task:', booking.taskId);
+  } catch(e) {
+    console.warn('Could not write Firebase completion:', e.message);
+  }
 }
 
 async function cancelBooking(itemId, btn) {
