@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>All-In Detailer · Bookings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  /* ── Reset & base ───────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --green:    #059669;
+    --green-lt: #D1FAE5;
+    --green-dk: #065F46;
+    --amber:    #D97706;
+    --amber-lt: #FEF3C7;
+    --amber-dk: #92400E;
+    --blue:     #2563EB;
+    --blue-lt:  #EFF6FF;
+    --blue-dk:  #1E3A5F;
+    --red:      #DC2626;
+    --red-lt:   #FEE2E2;
+    --red-dk:   #7F1D1D;
+    --gray:     #6B7280;
+    --gray-lt:  #F3F4F6;
+    --bg:       #0F0F0F;
+    --surface:  #1A1A1A;
+    --surface2: #242424;
+    --border:   #2E2E2E;
+    --text:     #F0EEE8;
+    --muted:    #888880;
+    --mono:     'DM Mono', monospace;
+    --display:  'Syne', sans-serif;
+    --body:     'DM Sans', sans-serif;
+  }
+
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--body); }
+
+  /* ── Layout ─────────────────────────────────────── */
+  .shell { display: grid; grid-template-rows: auto auto 1fr; min-height: 100vh; }
+
+  /* ── Header ─────────────────────────────────────── */
+  header {
+    padding: 20px 28px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--surface);
+  }
+  .logo { display: flex; align-items: center; gap: 12px; }
+  .logo-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: var(--green); display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+  }
+  .logo-text h1 { font-family: var(--display); font-size: 18px; font-weight: 800; letter-spacing: -0.3px; color: var(--text); }
+  .logo-text p  { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .last-sync { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+  .btn-refresh {
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); padding: 8px 14px; border-radius: 8px;
+    font-family: var(--body); font-size: 13px; font-weight: 500; cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .btn-refresh:hover { background: var(--border); border-color: #444; }
+
+  /* ── Tabs bar ───────────────────────────────────── */
+  .tabs-bar {
+    padding: 0 28px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex; gap: 4px; align-items: flex-end;
+  }
+  .tab {
+    padding: 12px 18px 11px;
+    font-family: var(--body); font-size: 13px; font-weight: 500;
+    color: var(--muted); cursor: pointer; border: none; background: none;
+    border-bottom: 2px solid transparent; transition: color 0.15s, border-color 0.15s;
+    display: flex; align-items: center; gap: 8px; white-space: nowrap;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--green); border-bottom-color: var(--green); }
+  .badge {
+    background: var(--green); color: #fff;
+    font-family: var(--mono); font-size: 10px; font-weight: 500;
+    padding: 2px 6px; border-radius: 20px; min-width: 20px; text-align: center;
+  }
+  .badge.hidden { display: none; }
+
+  /* ── Main content ───────────────────────────────── */
+  main { padding: 24px 28px; overflow-y: auto; }
+
+  /* ── Stats row ──────────────────────────────────── */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+  .stat {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px 18px;
+  }
+  .stat-val { font-family: var(--display); font-size: 28px; font-weight: 800; line-height: 1; }
+  .stat-val.green  { color: var(--green); }
+  .stat-val.amber  { color: var(--amber); }
+  .stat-val.blue   { color: var(--blue); }
+  .stat-val.gray   { color: var(--muted); }
+  .stat-label { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* ── Empty state ────────────────────────────────── */
+  .empty {
+    text-align: center; padding: 80px 20px;
+    color: var(--muted); font-family: var(--body);
+    display: none;
+  }
+  .empty.show { display: block; }
+  .empty-icon { font-size: 48px; margin-bottom: 16px; }
+  .empty h3 { font-family: var(--display); font-size: 20px; color: var(--text); margin-bottom: 8px; }
+
+  /* ── Loading ────────────────────────────────────── */
+  .loading { text-align: center; padding: 80px; color: var(--muted); font-family: var(--mono); font-size: 13px; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .loading { animation: pulse 1.5s ease-in-out infinite; }
+
+  /* ── Error ──────────────────────────────────────── */
+  .error-bar {
+    background: var(--red-lt); border: 1px solid var(--red);
+    border-radius: 10px; padding: 14px 18px; margin-bottom: 20px;
+    color: var(--red-dk); font-size: 13px; display: none;
+  }
+  .error-bar.show { display: block; }
+
+  /* ── Booking grid ───────────────────────────────── */
+  .bookings { display: grid; gap: 14px; }
+
+  /* ── Card ───────────────────────────────────────── */
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; overflow: hidden;
+    transition: border-color 0.15s, transform 0.15s;
+    animation: fadeUp 0.3s ease both;
+  }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+  .card:hover { border-color: #3E3E3E; transform: translateY(-1px); }
+  .card.status-pending  { border-left: 3px solid var(--amber); }
+  .card.status-confirmed{ border-left: 3px solid var(--green); }
+  .card.status-completed{ border-left: 3px solid var(--blue); }
+  .card.status-cancelled{ border-left: 3px solid var(--red); }
+
+  .card-header {
+    padding: 16px 20px 14px;
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .card-date-block { flex: 1; }
+  .card-date {
+    font-family: var(--display); font-size: 18px; font-weight: 800;
+    color: var(--text); letter-spacing: -0.3px;
+  }
+  .card-time {
+    font-family: var(--mono); font-size: 12px; color: var(--muted); margin-top: 3px;
+  }
+  .status-pill {
+    padding: 4px 10px; border-radius: 20px;
+    font-family: var(--mono); font-size: 11px; font-weight: 500; white-space: nowrap;
+  }
+  .pill-pending   { background: var(--amber-lt); color: var(--amber-dk); }
+  .pill-confirmed { background: var(--green-lt); color: var(--green-dk); }
+  .pill-completed { background: var(--blue-lt);  color: var(--blue-dk);  }
+  .pill-cancelled { background: var(--red-lt);   color: var(--red-dk);   }
+
+  .service-tag {
+    display: inline-block; margin-top: 8px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 4px 10px;
+    font-family: var(--mono); font-size: 12px; color: var(--text);
+  }
+
+  .card-body { padding: 16px 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 600px) { .card-body { grid-template-columns: 1fr; } }
+
+  .info-group { display: flex; flex-direction: column; gap: 10px; }
+  .info-row { display: flex; flex-direction: column; gap: 2px; }
+  .info-label { font-family: var(--mono); font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .info-val { font-family: var(--body); font-size: 14px; color: var(--text); font-weight: 500; }
+  .info-val.phone a { color: var(--green); text-decoration: none; font-family: var(--mono); font-size: 14px; }
+  .info-val.phone a:hover { text-decoration: underline; }
+
+  .vehicle-line { display: flex; align-items: center; gap: 8px; }
+  .color-swatch { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.15); flex-shrink: 0; }
+
+  .notes-block {
+    padding: 12px 20px; background: var(--surface2);
+    border-top: 1px solid var(--border);
+    font-size: 13px; color: var(--muted);
+    font-style: italic; line-height: 1.5;
+  }
+  .notes-block::before { content: '📝 '; font-style: normal; }
+
+  .card-actions {
+    padding: 14px 20px; border-top: 1px solid var(--border);
+    display: flex; gap: 10px; align-items: center;
+  }
+  .btn-confirm {
+    background: var(--green); color: #fff;
+    border: none; padding: 10px 18px; border-radius: 10px;
+    font-family: var(--body); font-size: 13px; font-weight: 600; cursor: pointer;
+    transition: background 0.15s, opacity 0.15s;
+  }
+  .btn-confirm:hover { background: #047857; }
+  .btn-confirm:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-complete {
+    background: var(--blue-lt); color: var(--blue-dk);
+    border: 1px solid var(--blue); padding: 10px 18px; border-radius: 10px;
+    font-family: var(--body); font-size: 13px; font-weight: 600; cursor: pointer;
+    transition: background 0.15s; opacity: 0.15s;
+  }
+  .btn-complete:hover { background: #DBEAFE; }
+  .btn-complete:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-cancel {
+    background: none; color: var(--muted);
+    border: 1px solid var(--border); padding: 10px 14px; border-radius: 10px;
+    font-family: var(--body); font-size: 13px; cursor: pointer;
+    transition: color 0.15s, border-color 0.15s; margin-left: auto;
+  }
+  .btn-cancel:hover { color: var(--red); border-color: var(--red); }
+
+  /* ── Config modal ───────────────────────────────── */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+    display: flex; align-items: center; justify-content: center; z-index: 100;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.hidden { display: none; }
+  .modal {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; padding: 32px; width: 100%; max-width: 480px; margin: 20px;
+  }
+  .modal h2 { font-family: var(--display); font-size: 22px; margin-bottom: 8px; }
+  .modal p  { color: var(--muted); font-size: 13px; line-height: 1.6; margin-bottom: 24px; }
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-family: var(--mono); font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .field input {
+    width: 100%; background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); padding: 12px 14px; border-radius: 10px;
+    font-family: var(--mono); font-size: 13px; outline: none;
+    transition: border-color 0.15s;
+  }
+  .field input:focus { border-color: var(--green); }
+  .btn-save {
+    width: 100%; background: var(--green); color: #fff;
+    border: none; padding: 14px; border-radius: 12px;
+    font-family: var(--display); font-size: 15px; font-weight: 800;
+    cursor: pointer; transition: background 0.15s; margin-top: 8px;
+  }
+  .btn-save:hover { background: #047857; }
+
+  /* ── Responsive ─────────────────────────────────── */
+  @media (max-width: 700px) {
+    header { padding: 16px; }
+    main { padding: 16px; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    .tabs-bar { padding: 0 16px; overflow-x: auto; }
+  }
+  @media (max-width: 400px) {
+    .stats { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Config modal (shown on first load) -->
+<div class="modal-overlay" id="configModal">
+  <div class="modal">
+    <h2>🧽 Connect to Wix</h2>
+    <p>Enter your Wix API credentials to load your bookings. These are saved in your browser — you only need to do this once.</p>
+    <div class="field">
+      <label>Wix API Key</label>
+      <input type="password" id="inputApiKey" placeholder="IST.eyJraWQi..."/>
+    </div>
+    <div class="field">
+      <label>Wix Site ID</label>
+      <input type="text" id="inputSiteId" placeholder="3d238844-fdc8-4c5a-8c4a-..."/>
+    </div>
+    <div class="field">
+      <label>Collection ID</label>
+      <input type="text" id="inputCollection" placeholder="ScheduleDetailing" value="ScheduleDetailing"/>
+    </div>
+    <button class="btn-save" onclick="saveConfig()">Connect Dashboard →</button>
+  </div>
+</div>
+
+<div class="shell">
+
+  <!-- Header -->
+  <header>
+    <div class="logo">
+      <div class="logo-icon">🧽</div>
+      <div class="logo-text">
+        <h1>All-In Detailer</h1>
+        <p>BOOKINGS DASHBOARD</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="last-sync" id="lastSync">—</span>
+      <button class="btn-refresh" onclick="loadBookings()">↻ Refresh</button>
+      <button class="btn-refresh" onclick="showConfig()" style="color:var(--muted)">⚙</button>
+    </div>
+  </header>
+
+  <!-- Tabs -->
+  <div class="tabs-bar">
+    <button class="tab active" id="tabPending"   onclick="switchTab('pending_confirmation')">
+      New Bookings <span class="badge" id="badgeNew">0</span>
+    </button>
+    <button class="tab" id="tabConfirmed" onclick="switchTab('confirmed')">Confirmed</button>
+    <button class="tab" id="tabCompleted" onclick="switchTab('completed')">Completed</button>
+    <button class="tab" id="tabAll"       onclick="switchTab('all')">All</button>
+  </div>
+
+  <!-- Main -->
+  <main>
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat"><div class="stat-val amber" id="statNew">—</div><div class="stat-label">Awaiting Confirm</div></div>
+      <div class="stat"><div class="stat-val green" id="statConfirmed">—</div><div class="stat-label">Confirmed</div></div>
+      <div class="stat"><div class="stat-val blue"  id="statCompleted">—</div><div class="stat-label">Completed</div></div>
+      <div class="stat"><div class="stat-val gray"  id="statTotal">—</div><div class="stat-label">Total Bookings</div></div>
+    </div>
+
+    <!-- Error -->
+    <div class="error-bar" id="errorBar"></div>
+
+    <!-- Content -->
+    <div id="content">
+      <div class="loading" id="loadingMsg">Loading bookings…</div>
+      <div class="empty" id="emptyMsg">
+        <div class="empty-icon">🎉</div>
+        <h3>All caught up!</h3>
+        <p>No bookings in this category right now.</p>
+      </div>
+      <div class="bookings" id="bookingsList"></div>
+    </div>
+  </main>
+</div>
+
+<script>
+// ── Config ───────────────────────────────────────────────────────────────────
+const CONFIG_KEY = 'allin_wix_config';
+
+const SERVICE_LABELS = {
+  exterior: 'Exterior Detail — $225',
+  interior: 'Interior Detail — $225',
+  combo:    'Combo Detail — $425',
+  ceramic:  'System X Ceramic — Quote',
+  moto:     'Motorcycle Detail — $400',
+  mobile:   'Mobile Detailing (+$25)',
+};
+const COLOR_HEX = {
+  white:'#F9FAFB', silver:'#9CA3AF', gray:'#6B7280', black:'#1F2937',
+  red:'#EF4444', blue:'#3B82F6', green:'#22C55E', brown:'#92400E', gold:'#D97706',
+};
+
+let allBookings = [];
+let currentTab  = 'pending_confirmation';
+let cfg         = null;
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  cfg = loadConfig();
+  if (!cfg) {
+    document.getElementById('configModal').classList.remove('hidden');
+    return;
+  }
+  document.getElementById('configModal').classList.add('hidden');
+  loadBookings();
+});
+
+// ── Config persistence ───────────────────────────────────────────────────────
+function loadConfig() {
+  try { return JSON.parse(localStorage.getItem(CONFIG_KEY)); } catch { return null; }
+}
+function saveConfig() {
+  const apiKey     = document.getElementById('inputApiKey').value.trim();
+  const siteId     = document.getElementById('inputSiteId').value.trim();
+  const collection = document.getElementById('inputCollection').value.trim() || 'ScheduleDetailing';
+  if (!apiKey || !siteId) { alert('API Key and Site ID are required.'); return; }
+  cfg = { apiKey, siteId, collection };
+  localStorage.setItem(CONFIG_KEY, JSON.stringify(cfg));
+  document.getElementById('configModal').classList.add('hidden');
+  loadBookings();
+}
+function showConfig() {
+  if (cfg) {
+    document.getElementById('inputApiKey').value    = cfg.apiKey    || '';
+    document.getElementById('inputSiteId').value    = cfg.siteId    || '';
+    document.getElementById('inputCollection').value= cfg.collection|| 'ScheduleDetailing';
+  }
+  document.getElementById('configModal').classList.remove('hidden');
+}
+
+// ── Wix API ──────────────────────────────────────────────────────────────────
+async function wixQuery(filter = null) {
+  const body = {
+    dataCollectionId: cfg.collection,
+    query: {
+      sort: [{ fieldName: 'scheduledDetailDate', order: 'ASC' }],
+      paging: { limit: 200 },
+      ...(filter ? { filter } : {}),
+    },
+  };
+  const res = await fetch(
+    `https://www.wixapis.com/wix-data/v2/items/query?siteId=${cfg.siteId}`,
+    {
+      method: 'POST',
+      headers: {
+        'Authorization':  cfg.apiKey,
+        'wix-site-id':    cfg.siteId,
+        'Content-Type':  'application/json',
+      },
+      body: JSON.stringify(body),
+    }
+  );
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Wix API ${res.status}: ${err}`);
+  }
+  const data = await res.json();
+  return data.dataItems?.map(item => item.data) || [];
+}
+
+async function wixUpdate(itemId, updates) {
+  const res = await fetch(
+    `https://www.wixapis.com/wix-data/v2/items/${itemId}?siteId=${cfg.siteId}`,
+    {
+      method: 'PUT',
+      headers: {
+        'Authorization': cfg.apiKey,
+        'wix-site-id':   cfg.siteId,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        dataCollectionId: cfg.collection,
+        dataItem: { id: itemId, data: updates },
+      }),
+    }
+  );
+  if (!res.ok) throw new Error(`Update failed: ${res.status}`);
+  return res.json();
+}
+
+// ── Load bookings ─────────────────────────────────────────────────────────────
+async function loadBookings() {
+  showLoading(true);
+  hideError();
+  try {
+    allBookings = await wixQuery();
+    updateStats();
+    renderBookings();
+    document.getElementById('lastSync').textContent = 'Synced ' + new Date().toLocaleTimeString();
+  } catch(err) {
+    showError(err.message);
+    console.error(err);
+  } finally {
+    showLoading(false);
+  }
+}
+
+// ── Stats ─────────────────────────────────────────────────────────────────────
+function updateStats() {
+  const pending   = allBookings.filter(b => b.bookingStatus === 'pending_confirmation').length;
+  const confirmed = allBookings.filter(b => b.bookingStatus === 'confirmed').length;
+  const completed = allBookings.filter(b => b.bookingStatus === 'completed').length;
+
+  document.getElementById('statNew').textContent       = pending;
+  document.getElementById('statConfirmed').textContent = confirmed;
+  document.getElementById('statCompleted').textContent = completed;
+  document.getElementById('statTotal').textContent     = allBookings.length;
+
+  const badge = document.getElementById('badgeNew');
+  badge.textContent = pending;
+  badge.classList.toggle('hidden', pending === 0);
+}
+
+// ── Tabs ──────────────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  const map = {
+    pending_confirmation: 'tabPending',
+    confirmed: 'tabConfirmed',
+    completed: 'tabCompleted',
+    all: 'tabAll',
+  };
+  document.getElementById(map[tab])?.classList.add('active');
+  renderBookings();
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function renderBookings() {
+  const filtered = currentTab === 'all'
+    ? allBookings
+    : allBookings.filter(b => b.bookingStatus === currentTab);
+
+  const list  = document.getElementById('bookingsList');
+  const empty = document.getElementById('emptyMsg');
+
+  list.innerHTML = '';
+
+  if (filtered.length === 0) {
+    empty.classList.add('show');
+    return;
+  }
+  empty.classList.remove('show');
+
+  filtered.forEach((b, i) => {
+    const card = buildCard(b);
+    card.style.animationDelay = `${i * 40}ms`;
+    list.appendChild(card);
+  });
+}
+
+// ── Build card ────────────────────────────────────────────────────────────────
+function buildCard(b) {
+  const card = document.createElement('div');
+  const status = b.bookingStatus || 'pending_confirmation';
+  card.className = `card status-${status.replace('pending_confirmation','pending')}`;
+
+  const dateStr = b.scheduledDetailDate
+    ? new Date(b.scheduledDetailDate).toLocaleDateString('en-US', {
+        weekday:'long', month:'long', day:'numeric', year:'numeric'
+      })
+    : 'Date TBD';
+
+  const timeStr = b.scheduledDetailTime
+    ? ({'Morning':'🌅 Morning','Afternoon':'☀️ Afternoon','Evening':'🌆 Evening'}[b.scheduledDetailTime] || b.scheduledDetailTime)
+    : '';
+
+  const pillClass = {
+    pending_confirmation: 'pill-pending',
+    confirmed: 'pill-confirmed',
+    completed: 'pill-completed',
+    cancelled: 'pill-cancelled',
+  }[status] || 'pill-pending';
+
+  const pillLabel = {
+    pending_confirmation: '⏳ Pending',
+    confirmed: '✅ Confirmed',
+    completed: '🏁 Completed',
+    cancelled: '❌ Cancelled',
+  }[status] || status;
+
+  const serviceLabel = SERVICE_LABELS[b.scheduledDetailService] || b.scheduledDetailService || 'Service TBD';
+
+  const vehicle = [b.vehicleYear, b.vehicleMake, b.vehicleModel, b.vehicleTrim].filter(Boolean).join(' ') || 'Vehicle TBD';
+  const colorKey = (b.vehicleColor || '').toLowerCase();
+  const colorHex = COLOR_HEX[colorKey] || '#4B5563';
+  const colorLabel = b.vehicleColor
+    ? b.vehicleColor.charAt(0).toUpperCase() + b.vehicleColor.slice(1)
+    : 'Unknown';
+
+  const mileage = b.vehicleMileage
+    ? parseInt(b.vehicleMileage).toLocaleString() + ' mi'
+    : '';
+
+  const phoneHtml = b.customerPhone
+    ? `<a href="tel:${b.customerPhone.replace(/\D/g,'')}">${b.customerPhone}</a>`
+    : '<span style="color:var(--muted)">No phone</span>';
+
+  // Action buttons
+  let actionsHtml = '';
+  const itemId = b._id || b.orderId;
+  if (status === 'pending_confirmation') {
+    actionsHtml = `
+      <div class="card-actions">
+        <button class="btn-confirm" onclick="confirmBooking('${itemId}', this)">✓ Confirm Booking</button>
+        <button class="btn-cancel"  onclick="cancelBooking('${itemId}', this)">✕ Cancel</button>
+      </div>`;
+  } else if (status === 'confirmed') {
+    actionsHtml = `
+      <div class="card-actions">
+        <button class="btn-complete" onclick="completeBooking('${itemId}', this)">🏁 Mark Complete</button>
+        <button class="btn-cancel"   onclick="cancelBooking('${itemId}', this)">✕ Cancel</button>
+      </div>`;
+  }
+
+  const notesHtml = b.scheduledDetailNotes
+    ? `<div class="notes-block">${escHtml(b.scheduledDetailNotes)}</div>`
+    : '';
+
+  card.innerHTML = `
+    <div class="card-header">
+      <div class="card-date-block">
+        <div class="card-date">${dateStr}</div>
+        ${timeStr ? `<div class="card-time">${timeStr}</div>` : ''}
+        <span class="service-tag">${escHtml(serviceLabel)}</span>
+      </div>
+      <span class="status-pill ${pillClass}">${pillLabel}</span>
+    </div>
+    <div class="card-body">
+      <div class="info-group">
+        <div class="info-row">
+          <div class="info-label">Customer</div>
+          <div class="info-val">${escHtml(b.customerName || 'Unknown')}</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">Phone</div>
+          <div class="info-val phone">${phoneHtml}</div>
+        </div>
+      </div>
+      <div class="info-group">
+        <div class="info-row">
+          <div class="info-label">Vehicle</div>
+          <div class="info-val">
+            <div class="vehicle-line">
+              <div class="color-swatch" style="background:${colorHex}"></div>
+              ${escHtml(vehicle)}
+            </div>
+            <div style="font-size:12px;color:var(--muted);margin-top:3px">${escHtml(colorLabel)}${mileage ? ' · ' + mileage : ''}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    ${notesHtml}
+    ${actionsHtml}
+  `;
+
+  return card;
+}
+
+// ── Actions ───────────────────────────────────────────────────────────────────
+async function confirmBooking(itemId, btn) {
+  btn.disabled = true; btn.textContent = 'Confirming…';
+  try {
+    await wixUpdate(itemId, {
+      bookingStatus:      'confirmed',
+      confirmedByPartner: true,
+      confirmedAt:        { $date: new Date().toISOString() },
+    });
+    await loadBookings();
+  } catch(err) { showError('Could not confirm: ' + err.message); btn.disabled = false; btn.textContent = '✓ Confirm Booking'; }
+}
+
+async function completeBooking(itemId, btn) {
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    await wixUpdate(itemId, {
+      bookingStatus: 'completed',
+      completedAt:   { $date: new Date().toISOString() },
+    });
+    await loadBookings();
+  } catch(err) { showError('Could not complete: ' + err.message); btn.disabled = false; btn.textContent = '🏁 Mark Complete'; }
+}
+
+async function cancelBooking(itemId, btn) {
+  if (!confirm('Cancel this booking?')) return;
+  btn.disabled = true;
+  try {
+    await wixUpdate(itemId, {
+      bookingStatus: 'cancelled',
+      cancelledAt:   { $date: new Date().toISOString() },
+    });
+    await loadBookings();
+  } catch(err) { showError('Could not cancel: ' + err.message); btn.disabled = false; }
+}
+
+// ── UI helpers ────────────────────────────────────────────────────────────────
+function showLoading(show) {
+  document.getElementById('loadingMsg').style.display = show ? 'block' : 'none';
+  document.getElementById('bookingsList').style.display = show ? 'none' : 'grid';
+}
+function showError(msg) {
+  const bar = document.getElementById('errorBar');
+  bar.textContent = '⚠️ ' + msg;
+  bar.classList.add('show');
+}
+function hideError() { document.getElementById('errorBar').classList.remove('show'); }
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
