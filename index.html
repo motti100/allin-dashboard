@@ -3,274 +3,367 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>All-In Detailer · Bookings</title>
+<title>All-In Automotive Detailing · Bookings</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
 <style>
-  /* ── Reset & base ───────────────────────────────── */
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --green:    #059669;
-    --green-lt: #D1FAE5;
-    --green-dk: #065F46;
-    --amber:    #D97706;
-    --amber-lt: #FEF3C7;
-    --amber-dk: #92400E;
-    --blue:     #2563EB;
-    --blue-lt:  #EFF6FF;
-    --blue-dk:  #1E3A5F;
-    --red:      #DC2626;
-    --red-lt:   #FEE2E2;
-    --red-dk:   #7F1D1D;
-    --gray:     #6B7280;
-    --gray-lt:  #F3F4F6;
-    --bg:       #0F0F0F;
-    --surface:  #1A1A1A;
-    --surface2: #242424;
-    --border:   #2E2E2E;
-    --text:     #F0EEE8;
-    --muted:    #888880;
-    --mono:     'DM Mono', monospace;
-    --display:  'Syne', sans-serif;
-    --body:     'DM Sans', sans-serif;
+    --gold:      #C8A84B;
+    --gold-lt:   #F0D98A;
+    --gold-dk:   #8B6E1F;
+    --gold-bg:   #C8A84B18;
+    --white:     #FFFFFF;
+    --off-white: #F4F0E8;
+    --bg:        #0A0A0A;
+    --surface:   #111111;
+    --surface2:  #1A1A1A;
+    --surface3:  #222222;
+    --border:    #2A2A2A;
+    --border2:   #333333;
+    --text:      #F4F0E8;
+    --muted:     #888880;
+    --green:     #2E7D32;
+    --green-lt:  #C8E6C9;
+    --red:       #C62828;
+    --red-lt:    #FFCDD2;
+    --blue:      #1565C0;
+    --blue-lt:   #BBDEFB;
+    --display:   'Bebas Neue', sans-serif;
+    --heading:   'Montserrat', sans-serif;
+    --body:      'Open Sans', sans-serif;
   }
-
   html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--body); }
-
-  /* ── Layout ─────────────────────────────────────── */
-  .shell { display: grid; grid-template-rows: auto auto 1fr; min-height: 100vh; }
 
   /* ── Header ─────────────────────────────────────── */
   header {
-    padding: 20px 28px 16px;
-    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    border-bottom: 2px solid var(--gold);
+    padding: 0 32px;
     display: flex; align-items: center; justify-content: space-between;
-    background: var(--surface);
+    height: 72px;
+    position: sticky; top: 0; z-index: 50;
   }
-  .logo { display: flex; align-items: center; gap: 12px; }
+  .logo { display: flex; align-items: center; gap: 16px; text-decoration: none; }
   .logo-icon {
-    width: 40px; height: 40px; border-radius: 10px;
-    background: var(--green); display: flex; align-items: center; justify-content: center;
-    font-size: 20px;
+    width: 44px; height: 44px; border-radius: 8px;
+    background: var(--gold); display: flex; align-items: center; justify-content: center;
+    font-size: 22px; flex-shrink: 0;
   }
-  .logo-text h1 { font-family: var(--display); font-size: 18px; font-weight: 800; letter-spacing: -0.3px; color: var(--text); }
-  .logo-text p  { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 1px; }
-  .header-right { display: flex; align-items: center; gap: 12px; }
-  .last-sync { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+  .logo-name {
+    font-family: var(--display); font-size: 26px; letter-spacing: 1.5px;
+    color: var(--white); line-height: 1;
+  }
+  .logo-sub {
+    font-family: var(--heading); font-size: 9px; font-weight: 700;
+    letter-spacing: 3px; color: var(--gold); text-transform: uppercase; margin-top: 3px;
+  }
+  .header-right { display: flex; align-items: center; gap: 16px; }
+  .phone-link {
+    font-family: var(--heading); font-size: 13px; font-weight: 700;
+    color: var(--gold); text-decoration: none; letter-spacing: 0.5px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .phone-link:hover { color: var(--gold-lt); }
+  .last-sync { font-family: var(--body); font-size: 11px; color: var(--muted); }
+  .btn-icon {
+    background: none; border: 1px solid var(--border2); color: var(--muted);
+    width: 36px; height: 36px; border-radius: 8px; cursor: pointer;
+    font-size: 16px; display: flex; align-items: center; justify-content: center;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .btn-icon:hover { border-color: var(--gold); color: var(--gold); }
   .btn-refresh {
-    background: var(--surface2); border: 1px solid var(--border);
-    color: var(--text); padding: 8px 14px; border-radius: 8px;
-    font-family: var(--body); font-size: 13px; font-weight: 500; cursor: pointer;
-    transition: background 0.15s, border-color 0.15s;
+    background: var(--gold); color: var(--bg); border: none;
+    padding: 9px 18px; border-radius: 6px; cursor: pointer;
+    font-family: var(--heading); font-size: 12px; font-weight: 700;
+    letter-spacing: 0.5px; text-transform: uppercase;
+    transition: background 0.15s, transform 0.1s;
   }
-  .btn-refresh:hover { background: var(--border); border-color: #444; }
+  .btn-refresh:hover { background: var(--gold-lt); transform: translateY(-1px); }
 
-  /* ── Tabs bar ───────────────────────────────────── */
+  /* ── Gold divider ────────────────────────────────── */
+  .gold-stripe { height: 3px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+
+  /* ── Tabs ────────────────────────────────────────── */
   .tabs-bar {
-    padding: 0 28px;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    display: flex; gap: 4px; align-items: flex-end;
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 0 32px; display: flex; gap: 0; align-items: flex-end; overflow-x: auto;
   }
   .tab {
-    padding: 12px 18px 11px;
-    font-family: var(--body); font-size: 13px; font-weight: 500;
-    color: var(--muted); cursor: pointer; border: none; background: none;
-    border-bottom: 2px solid transparent; transition: color 0.15s, border-color 0.15s;
-    display: flex; align-items: center; gap: 8px; white-space: nowrap;
+    padding: 14px 22px 13px; border: none; background: none; cursor: pointer;
+    font-family: var(--heading); font-size: 12px; font-weight: 700;
+    letter-spacing: 1px; text-transform: uppercase; color: var(--muted);
+    border-bottom: 3px solid transparent; white-space: nowrap;
+    display: flex; align-items: center; gap: 8px;
+    transition: color 0.15s, border-color 0.15s;
   }
-  .tab:hover { color: var(--text); }
-  .tab.active { color: var(--green); border-bottom-color: var(--green); }
+  .tab:hover { color: var(--off-white); }
+  .tab.active { color: var(--gold); border-bottom-color: var(--gold); }
   .badge {
-    background: var(--green); color: #fff;
-    font-family: var(--mono); font-size: 10px; font-weight: 500;
-    padding: 2px 6px; border-radius: 20px; min-width: 20px; text-align: center;
+    background: var(--gold); color: var(--bg);
+    font-size: 10px; font-weight: 800;
+    padding: 2px 7px; border-radius: 20px;
+    font-family: var(--heading);
   }
   .badge.hidden { display: none; }
 
-  /* ── Main content ───────────────────────────────── */
-  main { padding: 24px 28px; overflow-y: auto; }
+  /* ── Main ────────────────────────────────────────── */
+  main { padding: 28px 32px; max-width: 1200px; margin: 0 auto; }
 
-  /* ── Stats row ──────────────────────────────────── */
-  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+  /* ── Stats ───────────────────────────────────────── */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 28px; }
   .stat {
     background: var(--surface); border: 1px solid var(--border);
-    border-radius: 12px; padding: 16px 18px;
+    border-radius: 10px; padding: 20px 22px;
+    position: relative; overflow: hidden;
   }
-  .stat-val { font-family: var(--display); font-size: 28px; font-weight: 800; line-height: 1; }
-  .stat-val.green  { color: var(--green); }
-  .stat-val.amber  { color: var(--amber); }
-  .stat-val.blue   { color: var(--blue); }
-  .stat-val.gray   { color: var(--muted); }
-  .stat-label { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
-
-  /* ── Empty state ────────────────────────────────── */
-  .empty {
-    text-align: center; padding: 80px 20px;
-    color: var(--muted); font-family: var(--body);
-    display: none;
+  .stat::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0;
+    height: 2px; background: var(--gold); opacity: 0.5;
   }
-  .empty.show { display: block; }
-  .empty-icon { font-size: 48px; margin-bottom: 16px; }
-  .empty h3 { font-family: var(--display); font-size: 20px; color: var(--text); margin-bottom: 8px; }
+  .stat-val {
+    font-family: var(--display); font-size: 42px; line-height: 1;
+    color: var(--gold); letter-spacing: 1px;
+  }
+  .stat-val.green { color: #4CAF50; }
+  .stat-val.blue  { color: #64B5F6; }
+  .stat-val.gray  { color: var(--muted); }
+  .stat-label {
+    font-family: var(--heading); font-size: 10px; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-top: 6px;
+  }
 
-  /* ── Loading ────────────────────────────────────── */
-  .loading { text-align: center; padding: 80px; color: var(--muted); font-family: var(--mono); font-size: 13px; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-  .loading { animation: pulse 1.5s ease-in-out infinite; }
-
-  /* ── Error ──────────────────────────────────────── */
+  /* ── Error ───────────────────────────────────────── */
   .error-bar {
-    background: var(--red-lt); border: 1px solid var(--red);
-    border-radius: 10px; padding: 14px 18px; margin-bottom: 20px;
-    color: var(--red-dk); font-size: 13px; display: none;
+    background: #1A0000; border: 1px solid var(--red);
+    border-radius: 8px; padding: 14px 18px; margin-bottom: 20px;
+    color: #FF8A80; font-size: 13px; display: none; font-family: var(--body);
   }
   .error-bar.show { display: block; }
 
-  /* ── Booking grid ───────────────────────────────── */
-  .bookings { display: grid; gap: 14px; }
+  /* ── Loading ─────────────────────────────────────── */
+  .loading {
+    text-align: center; padding: 80px; color: var(--muted);
+    font-family: var(--heading); font-size: 12px; letter-spacing: 2px;
+    text-transform: uppercase; animation: pulse 1.5s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-  /* ── Card ───────────────────────────────────────── */
+  /* ── Empty ───────────────────────────────────────── */
+  .empty { text-align: center; padding: 80px 20px; display: none; }
+  .empty.show { display: block; }
+  .empty-icon { font-size: 52px; margin-bottom: 16px; }
+  .empty h3 {
+    font-family: var(--display); font-size: 28px; letter-spacing: 1px;
+    color: var(--gold); margin-bottom: 8px;
+  }
+  .empty p { color: var(--muted); font-size: 14px; }
+
+  /* ── Bookings grid ───────────────────────────────── */
+  .bookings { display: grid; gap: 16px; }
+
+  /* ── Card ────────────────────────────────────────── */
   .card {
     background: var(--surface); border: 1px solid var(--border);
-    border-radius: 16px; overflow: hidden;
-    transition: border-color 0.15s, transform 0.15s;
+    border-radius: 10px; overflow: hidden;
     animation: fadeUp 0.3s ease both;
+    transition: border-color 0.2s, transform 0.15s;
   }
-  @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
-  .card:hover { border-color: #3E3E3E; transform: translateY(-1px); }
-  .card.status-pending  { border-left: 3px solid var(--amber); }
-  .card.status-confirmed{ border-left: 3px solid var(--green); }
-  .card.status-completed{ border-left: 3px solid var(--blue); }
-  .card.status-cancelled{ border-left: 3px solid var(--red); }
+  .card:hover { border-color: var(--border2); transform: translateY(-2px); }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+  .card.status-pending   { border-left: 3px solid var(--gold); }
+  .card.status-confirmed { border-left: 3px solid #4CAF50; }
+  .card.status-completed { border-left: 3px solid #64B5F6; }
+  .card.status-cancelled { border-left: 3px solid var(--red); }
 
+  /* Card header */
   .card-header {
-    padding: 16px 20px 14px;
-    display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+    padding: 18px 22px 16px;
     border-bottom: 1px solid var(--border);
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
   }
-  .card-date-block { flex: 1; }
   .card-date {
-    font-family: var(--display); font-size: 18px; font-weight: 800;
-    color: var(--text); letter-spacing: -0.3px;
+    font-family: var(--display); font-size: 22px; letter-spacing: 0.5px;
+    color: var(--white); line-height: 1;
   }
   .card-time {
-    font-family: var(--mono); font-size: 12px; color: var(--muted); margin-top: 3px;
+    font-family: var(--heading); font-size: 12px; color: var(--gold);
+    margin-top: 4px; font-weight: 600; letter-spacing: 0.5px;
+  }
+  .service-tag {
+    display: inline-block; margin-top: 10px;
+    background: var(--gold-bg); border: 1px solid var(--gold);
+    border-radius: 4px; padding: 4px 12px;
+    font-family: var(--heading); font-size: 11px; font-weight: 700;
+    color: var(--gold); letter-spacing: 0.5px; text-transform: uppercase;
   }
   .status-pill {
-    padding: 4px 10px; border-radius: 20px;
-    font-family: var(--mono); font-size: 11px; font-weight: 500; white-space: nowrap;
+    padding: 5px 12px; border-radius: 4px;
+    font-family: var(--heading); font-size: 10px; font-weight: 800;
+    letter-spacing: 1px; text-transform: uppercase; white-space: nowrap;
   }
-  .pill-pending   { background: var(--amber-lt); color: var(--amber-dk); }
-  .pill-confirmed { background: var(--green-lt); color: var(--green-dk); }
-  .pill-completed { background: var(--blue-lt);  color: var(--blue-dk);  }
-  .pill-cancelled { background: var(--red-lt);   color: var(--red-dk);   }
+  .pill-pending   { background: var(--gold-bg);   color: var(--gold);   border: 1px solid var(--gold); }
+  .pill-confirmed { background: #1B5E2020;          color: #81C784;        border: 1px solid #2E7D32; }
+  .pill-completed { background: #0D47A120;          color: #90CAF9;        border: 1px solid #1565C0; }
+  .pill-cancelled { background: #B71C1C20;          color: #EF9A9A;        border: 1px solid #C62828; }
 
-  .service-tag {
-    display: inline-block; margin-top: 8px;
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 8px; padding: 4px 10px;
-    font-family: var(--mono); font-size: 12px; color: var(--text);
+  /* Card body */
+  .card-body {
+    padding: 18px 22px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
   }
+  .info-group { display: flex; flex-direction: column; gap: 14px; }
+  .info-row { display: flex; flex-direction: column; gap: 3px; }
+  .info-label {
+    font-family: var(--heading); font-size: 9px; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase; color: var(--gold);
+  }
+  .info-val {
+    font-family: var(--body); font-size: 15px; font-weight: 600; color: var(--text);
+  }
+  .info-val a {
+    color: var(--gold); text-decoration: none; font-weight: 700;
+    font-family: var(--heading); font-size: 16px; letter-spacing: 0.5px;
+  }
+  .info-val a:hover { color: var(--gold-lt); text-decoration: underline; }
+  .vehicle-line { display: flex; align-items: center; gap: 10px; }
+  .color-swatch {
+    width: 16px; height: 16px; border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.2); flex-shrink: 0;
+  }
+  .vehicle-sub { font-size: 12px; color: var(--muted); margin-top: 3px; font-weight: 400; }
 
-  .card-body { padding: 16px 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  @media (max-width: 600px) { .card-body { grid-template-columns: 1fr; } }
-
-  .info-group { display: flex; flex-direction: column; gap: 10px; }
-  .info-row { display: flex; flex-direction: column; gap: 2px; }
-  .info-label { font-family: var(--mono); font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
-  .info-val { font-family: var(--body); font-size: 14px; color: var(--text); font-weight: 500; }
-  .info-val.phone a { color: var(--green); text-decoration: none; font-family: var(--mono); font-size: 14px; }
-  .info-val.phone a:hover { text-decoration: underline; }
-
-  .vehicle-line { display: flex; align-items: center; gap: 8px; }
-  .color-swatch { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.15); flex-shrink: 0; }
-
+  /* Notes */
   .notes-block {
-    padding: 12px 20px; background: var(--surface2);
-    border-top: 1px solid var(--border);
-    font-size: 13px; color: var(--muted);
-    font-style: italic; line-height: 1.5;
+    padding: 12px 22px;
+    background: var(--surface2); border-top: 1px solid var(--border);
+    font-size: 13px; color: var(--muted); font-style: italic; line-height: 1.5;
   }
-  .notes-block::before { content: '📝 '; font-style: normal; }
+  .notes-label {
+    font-family: var(--heading); font-size: 9px; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase; color: var(--gold);
+    margin-bottom: 4px; font-style: normal;
+  }
 
+  /* Actions */
   .card-actions {
-    padding: 14px 20px; border-top: 1px solid var(--border);
-    display: flex; gap: 10px; align-items: center;
+    padding: 14px 22px; border-top: 1px solid var(--border);
+    display: flex; gap: 12px; align-items: center;
+    background: var(--surface2);
   }
   .btn-confirm {
-    background: var(--green); color: #fff;
-    border: none; padding: 10px 18px; border-radius: 10px;
-    font-family: var(--body); font-size: 13px; font-weight: 600; cursor: pointer;
-    transition: background 0.15s, opacity 0.15s;
+    background: var(--gold); color: var(--bg); border: none;
+    padding: 11px 22px; border-radius: 6px; cursor: pointer;
+    font-family: var(--heading); font-size: 12px; font-weight: 800;
+    letter-spacing: 1px; text-transform: uppercase;
+    transition: background 0.15s, transform 0.1s;
   }
-  .btn-confirm:hover { background: #047857; }
-  .btn-confirm:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-confirm:hover { background: var(--gold-lt); transform: translateY(-1px); }
+  .btn-confirm:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
   .btn-complete {
-    background: var(--blue-lt); color: var(--blue-dk);
-    border: 1px solid var(--blue); padding: 10px 18px; border-radius: 10px;
-    font-family: var(--body); font-size: 13px; font-weight: 600; cursor: pointer;
-    transition: background 0.15s; opacity: 0.15s;
+    background: none; color: #81C784; border: 1px solid #2E7D32;
+    padding: 11px 22px; border-radius: 6px; cursor: pointer;
+    font-family: var(--heading); font-size: 12px; font-weight: 800;
+    letter-spacing: 1px; text-transform: uppercase;
+    transition: background 0.15s, transform 0.1s;
   }
-  .btn-complete:hover { background: #DBEAFE; }
-  .btn-complete:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-complete:hover { background: #1B5E2020; transform: translateY(-1px); }
+  .btn-complete:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
   .btn-cancel {
-    background: none; color: var(--muted);
-    border: 1px solid var(--border); padding: 10px 14px; border-radius: 10px;
-    font-family: var(--body); font-size: 13px; cursor: pointer;
-    transition: color 0.15s, border-color 0.15s; margin-left: auto;
+    background: none; color: var(--muted); border: 1px solid var(--border);
+    padding: 11px 16px; border-radius: 6px; cursor: pointer;
+    font-family: var(--heading); font-size: 11px; font-weight: 700;
+    letter-spacing: 0.5px; text-transform: uppercase; margin-left: auto;
+    transition: color 0.15s, border-color 0.15s;
   }
-  .btn-cancel:hover { color: var(--red); border-color: var(--red); }
+  .btn-cancel:hover { color: #EF9A9A; border-color: var(--red); }
 
-  /* ── Config modal ───────────────────────────────── */
+  /* ── Config modal ────────────────────────────────── */
   .modal-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.8);
-    display: flex; align-items: center; justify-content: center; z-index: 100;
-    backdrop-filter: blur(4px);
+    position: fixed; inset: 0; background: rgba(0,0,0,0.92);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100; backdrop-filter: blur(8px);
   }
   .modal-overlay.hidden { display: none; }
   .modal {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 20px; padding: 32px; width: 100%; max-width: 480px; margin: 20px;
+    background: var(--surface); border: 1px solid var(--gold);
+    border-radius: 12px; padding: 40px; width: 100%; max-width: 500px; margin: 20px;
+    position: relative;
   }
-  .modal h2 { font-family: var(--display); font-size: 22px; margin-bottom: 8px; }
-  .modal p  { color: var(--muted); font-size: 13px; line-height: 1.6; margin-bottom: 24px; }
-  .field { margin-bottom: 16px; }
-  .field label { display: block; font-family: var(--mono); font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .modal::before {
+    content: ''; position: absolute; top: 0; left: 20%; right: 20%;
+    height: 2px; background: var(--gold); border-radius: 0 0 4px 4px;
+  }
+  .modal-logo { text-align: center; margin-bottom: 28px; }
+  .modal-logo-icon {
+    width: 56px; height: 56px; background: var(--gold); border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; margin: 0 auto 12px;
+  }
+  .modal h2 {
+    font-family: var(--display); font-size: 30px; letter-spacing: 1px;
+    color: var(--white); text-align: center; margin-bottom: 6px;
+  }
+  .modal p {
+    color: var(--muted); font-size: 13px; text-align: center;
+    line-height: 1.6; margin-bottom: 28px;
+  }
+  .field { margin-bottom: 18px; }
+  .field label {
+    display: block; font-family: var(--heading); font-size: 10px; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase; color: var(--gold); margin-bottom: 7px;
+  }
   .field input {
-    width: 100%; background: var(--surface2); border: 1px solid var(--border);
-    color: var(--text); padding: 12px 14px; border-radius: 10px;
-    font-family: var(--mono); font-size: 13px; outline: none;
+    width: 100%; background: var(--surface2); border: 1px solid var(--border2);
+    color: var(--text); padding: 13px 16px; border-radius: 8px;
+    font-family: var(--body); font-size: 13px; outline: none;
     transition: border-color 0.15s;
   }
-  .field input:focus { border-color: var(--green); }
-  .btn-save {
-    width: 100%; background: var(--green); color: #fff;
-    border: none; padding: 14px; border-radius: 12px;
-    font-family: var(--display); font-size: 15px; font-weight: 800;
-    cursor: pointer; transition: background 0.15s; margin-top: 8px;
+  .field input:focus { border-color: var(--gold); }
+  .field input::placeholder { color: var(--muted); }
+  .btn-connect {
+    width: 100%; background: var(--gold); color: var(--bg); border: none;
+    padding: 16px; border-radius: 8px; cursor: pointer;
+    font-family: var(--display); font-size: 22px; letter-spacing: 1.5px;
+    transition: background 0.15s, transform 0.1s; margin-top: 8px;
   }
-  .btn-save:hover { background: #047857; }
+  .btn-connect:hover { background: var(--gold-lt); transform: translateY(-1px); }
 
-  /* ── Responsive ─────────────────────────────────── */
-  @media (max-width: 700px) {
-    header { padding: 16px; }
-    main { padding: 16px; }
-    .stats { grid-template-columns: 1fr 1fr; }
-    .tabs-bar { padding: 0 16px; overflow-x: auto; }
+  /* ── Footer ──────────────────────────────────────── */
+  footer {
+    text-align: center; padding: 24px;
+    color: var(--muted); font-size: 11px; font-family: var(--heading);
+    letter-spacing: 1px; border-top: 1px solid var(--border);
   }
-  @media (max-width: 400px) {
-    .stats { grid-template-columns: 1fr; }
+  footer a { color: var(--gold); text-decoration: none; }
+
+  /* ── Responsive ──────────────────────────────────── */
+  @media (max-width: 768px) {
+    header { padding: 0 16px; height: 64px; }
+    main { padding: 20px 16px; }
+    .tabs-bar { padding: 0 16px; }
+    .stats { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .card-body { grid-template-columns: 1fr; }
+    .phone-link span { display: none; }
+    .logo-name { font-size: 20px; }
+  }
+  @media (max-width: 480px) {
+    .stats { grid-template-columns: 1fr 1fr; }
+    .stat-val { font-size: 32px; }
   }
 </style>
 </head>
 <body>
 
-<!-- Config modal (shown on first load) -->
+<!-- Config modal -->
 <div class="modal-overlay" id="configModal">
   <div class="modal">
-    <h2>🧽 Connect to Wix</h2>
-    <p>Enter your Wix API credentials to load your bookings. These are saved in your browser — you only need to do this once. Your API key is never sent anywhere except your own Cloudflare Worker proxy.</p>
+    <div class="modal-logo">
+      <div class="modal-logo-icon">🧽</div>
+      <h2>ALL-IN DETAILER</h2>
+      <p>Connect your Wix dashboard to start managing bookings. Your credentials are saved in this browser.</p>
+    </div>
     <div class="field">
       <label>Wix API Key</label>
       <input type="password" id="inputApiKey" placeholder="IST.eyJraWQi..."/>
@@ -284,67 +377,65 @@
       <input type="text" id="inputCollection" placeholder="ScheduleDetailing" value="ScheduleDetailing"/>
     </div>
     <div class="field">
-      <label>Cloudflare Worker URL <span style="color:var(--green)">*</span></label>
-      <input type="text" id="inputProxy" placeholder="https://allin-proxy.yourname.workers.dev"/>
-      <div style="font-size:11px;color:var(--muted);margin-top:4px">Deploy the included <code>cloudflare_worker.js</code> at workers.cloudflare.com (free)</div>
+      <label>Cloudflare Worker URL <span style="color:var(--gold)">*</span></label>
+      <input type="text" id="inputProxy" placeholder="https://allin-proxy.mtobias2000.workers.dev"/>
+      <div style="font-size:11px;color:var(--muted);margin-top:5px;font-family:var(--body)">Your proxy worker URL from Cloudflare</div>
     </div>
-    <button class="btn-save" onclick="saveConfig()">Connect Dashboard →</button>
+    <button class="btn-connect" onclick="saveConfig()">CONNECT DASHBOARD</button>
   </div>
 </div>
 
-<div class="shell">
-
-  <!-- Header -->
-  <header>
-    <div class="logo">
-      <div class="logo-icon">🧽</div>
-      <div class="logo-text">
-        <h1>All-In Detailer</h1>
-        <p>BOOKINGS DASHBOARD</p>
-      </div>
+<!-- App shell -->
+<header>
+  <a class="logo" href="https://www.allindetailer.com" target="_blank">
+    <div class="logo-icon">🧽</div>
+    <div>
+      <div class="logo-name">ALL-IN DETAILER</div>
+      <div class="logo-sub">Bookings Dashboard</div>
     </div>
-    <div class="header-right">
-      <span class="last-sync" id="lastSync">—</span>
-      <button class="btn-refresh" onclick="loadBookings()">↻ Refresh</button>
-      <button class="btn-refresh" onclick="showConfig()" style="color:var(--muted)">⚙</button>
-    </div>
-  </header>
+  </a>
+  <div class="header-right">
+    <a class="phone-link" href="tel:5082628855">📞 <span>(508) 262-8855</span></a>
+    <span class="last-sync" id="lastSync"></span>
+    <button class="btn-refresh" onclick="loadBookings()">↻ Refresh</button>
+    <button class="btn-icon" onclick="showConfig()" title="Settings">⚙</button>
+  </div>
+</header>
 
-  <!-- Tabs -->
-  <div class="tabs-bar">
-    <button class="tab active" id="tabPending"   onclick="switchTab('pending_confirmation')">
-      New Bookings <span class="badge" id="badgeNew">0</span>
-    </button>
-    <button class="tab" id="tabConfirmed" onclick="switchTab('confirmed')">Confirmed</button>
-    <button class="tab" id="tabCompleted" onclick="switchTab('completed')">Completed</button>
-    <button class="tab" id="tabAll"       onclick="switchTab('all')">All</button>
+<div class="tabs-bar">
+  <button class="tab active" id="tabPending" onclick="switchTab('pending_confirmation')">
+    New Bookings <span class="badge" id="badgeNew">0</span>
+  </button>
+  <button class="tab" id="tabConfirmed" onclick="switchTab('confirmed')">Confirmed</button>
+  <button class="tab" id="tabCompleted" onclick="switchTab('completed')">Completed</button>
+  <button class="tab" id="tabAll"       onclick="switchTab('all')">All</button>
+</div>
+
+<main>
+  <div class="stats">
+    <div class="stat"><div class="stat-val" id="statNew">—</div><div class="stat-label">Awaiting Confirm</div></div>
+    <div class="stat"><div class="stat-val green" id="statConfirmed">—</div><div class="stat-label">Confirmed</div></div>
+    <div class="stat"><div class="stat-val blue"  id="statCompleted">—</div><div class="stat-label">Completed</div></div>
+    <div class="stat"><div class="stat-val gray"  id="statTotal">—</div><div class="stat-label">Total Bookings</div></div>
   </div>
 
-  <!-- Main -->
-  <main>
-    <!-- Stats -->
-    <div class="stats">
-      <div class="stat"><div class="stat-val amber" id="statNew">—</div><div class="stat-label">Awaiting Confirm</div></div>
-      <div class="stat"><div class="stat-val green" id="statConfirmed">—</div><div class="stat-label">Confirmed</div></div>
-      <div class="stat"><div class="stat-val blue"  id="statCompleted">—</div><div class="stat-label">Completed</div></div>
-      <div class="stat"><div class="stat-val gray"  id="statTotal">—</div><div class="stat-label">Total Bookings</div></div>
-    </div>
+  <div class="error-bar" id="errorBar"></div>
 
-    <!-- Error -->
-    <div class="error-bar" id="errorBar"></div>
-
-    <!-- Content -->
-    <div id="content">
-      <div class="loading" id="loadingMsg">Loading bookings…</div>
-      <div class="empty" id="emptyMsg">
-        <div class="empty-icon">🎉</div>
-        <h3>All caught up!</h3>
-        <p>No bookings in this category right now.</p>
-      </div>
-      <div class="bookings" id="bookingsList"></div>
+  <div id="content">
+    <div class="loading" id="loadingMsg">Loading bookings…</div>
+    <div class="empty" id="emptyMsg">
+      <div class="empty-icon">✨</div>
+      <h3>ALL CLEAR</h3>
+      <p>No bookings in this category right now.</p>
     </div>
-  </main>
-</div>
+    <div class="bookings" id="bookingsList"></div>
+  </div>
+</main>
+
+<footer>
+  © 2026 ALL-IN AUTOMOTIVE DETAILING · <a href="https://www.allindetailer.com">allindetailer.com</a>
+</footer>
+
 
 <script>
 // ── Config ───────────────────────────────────────────────────────────────────
@@ -636,7 +727,7 @@ function buildCard(b) {
   }
 
   const notesHtml = b.scheduledDetailNotes
-    ? `<div class="notes-block">${escHtml(b.scheduledDetailNotes)}</div>`
+    ? `<div class="notes-block"><div class="notes-label">Customer Notes</div>${escHtml(b.scheduledDetailNotes)}</div>`
     : '';
 
   card.innerHTML = `
@@ -738,5 +829,6 @@ function escHtml(s) {
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 </script>
+
 </body>
 </html>
